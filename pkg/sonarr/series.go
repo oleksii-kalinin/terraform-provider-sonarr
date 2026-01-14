@@ -59,11 +59,18 @@ func (c Client) CreateSeries(show *Series) (*Series, error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	res, err := c.doRequest(req)
 	if err != nil {
 		return nil, err
 	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
 
 	switch res.StatusCode {
 	case http.StatusCreated:
@@ -75,7 +82,7 @@ func (c Client) CreateSeries(show *Series) (*Series, error) {
 
 	var result Series
 	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&res)
+	err = decoder.Decode(&result)
 	return &result, nil
 }
 

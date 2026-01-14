@@ -15,5 +15,5 @@ type Series struct {
 	QualityProfileId int    `json:"qualityProfileId"`
 	Monitored        bool   `json:"monitored"`
 	SeasonFolder     bool   `json:"seasonFolder"`
-	TvdbID           int32  `json:"tvdbID"`
+	TvdbID           int32  `json:"tvdbId"`
 }
