@@ -1,6 +1,7 @@
 package sonarr
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,6 +43,40 @@ func (c Client) GetSeries(id int32) (*Series, error) {
 		return nil, err
 	}
 	return &series, nil
+}
+
+func (c Client) CreateSeries(show *Series) (*Series, error) {
+	jsonBytes, err := json.Marshal(show)
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/api/v3/series", c.BaseURL)
+
+	reqReader := bytes.NewBuffer(jsonBytes)
+
+	req, err := http.NewRequest("POST", url, reqReader)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	switch res.StatusCode {
+	case http.StatusCreated:
+		break
+	default:
+		bodyBytes, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("API error: %d - %s", res.StatusCode, string(bodyBytes))
+	}
+
+	var result Series
+	decoder := json.NewDecoder(res.Body)
+	err = decoder.Decode(&res)
+	return &result, nil
 }
 
 func (s Series) String() string {
