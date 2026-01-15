@@ -7,9 +7,11 @@ import (
 	"io"
 	"log"
 	"net/http"
+	url2 "net/url"
+	"strconv"
 )
 
-func (c Client) GetSeries(id int32) (*Series, error) {
+func (c Client) GetSeries(id int) (*Series, error) {
 	series := Series{}
 
 	url := fmt.Sprintf("%s/api/v3/series/%d", c.BaseURL, id)
@@ -28,6 +30,7 @@ func (c Client) GetSeries(id int32) (*Series, error) {
 			log.Print(err)
 		}
 	}(resp.Body)
+
 	switch resp.StatusCode {
 	case http.StatusNotFound:
 		return nil, nil // No such resource
@@ -59,7 +62,6 @@ func (c Client) CreateSeries(show *Series) (*Series, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "application/json")
 
 	res, err := c.doRequest(req)
 	if err != nil {
@@ -84,6 +86,44 @@ func (c Client) CreateSeries(show *Series) (*Series, error) {
 	decoder := json.NewDecoder(res.Body)
 	err = decoder.Decode(&result)
 	return &result, nil
+}
+
+func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
+	u, err := url2.Parse(c.BaseURL)
+	if err != nil {
+		return err
+	}
+
+	u = u.JoinPath("api", "v3", "series", strconv.Itoa(id))
+
+	q := u.Query()
+	q.Set("deleteFiles", strconv.FormatBool(deleteFiles))
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("DELETE", u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
+
+	switch res.StatusCode {
+	case http.StatusOK:
+		return nil
+	case http.StatusNotFound:
+		return nil
+	default:
+		return fmt.Errorf("API error: %d", res.StatusCode)
+	}
 }
 
 func (s Series) String() string {

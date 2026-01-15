@@ -73,4 +73,12 @@ func main() {
 		return
 	}
 	fmt.Println(wanted)
+	time.Sleep(10 * time.Second)
+
+	err = client.DeleteSeries(wanted.Id, true)
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Println(err)
+		return
+	}
 }
