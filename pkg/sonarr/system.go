@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (c Client) GetSystemStatus() (*SystemStatus, error) {
+func (c *Client) GetSystemStatus() (*SystemStatus, error) {
 	status := SystemStatus{}
 
 	url := c.BaseURL + "/api/v3/system/status"

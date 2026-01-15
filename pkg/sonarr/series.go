@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func (c Client) GetSeries(id int) (*Series, error) {
+func (c *Client) GetSeries(id int) (*Series, error) {
 	series := Series{}
 
 	url := fmt.Sprintf("%s/api/v3/series/%d", c.BaseURL, id)
@@ -48,7 +48,7 @@ func (c Client) GetSeries(id int) (*Series, error) {
 	return &series, nil
 }
 
-func (c Client) CreateSeries(show *Series) (*Series, error) {
+func (c *Client) CreateSeries(show *Series) (*Series, error) {
 	jsonBytes, err := json.Marshal(show)
 	if err != nil {
 		return nil, err
