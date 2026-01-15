@@ -57,4 +57,20 @@ func main() {
 		return
 	}
 	fmt.Println(series)
+
+	wantedShow := sonarr.Series{
+		TvdbID:           289590,
+		Title:            "Mr. Robot",
+		Monitored:        false,
+		RootFolderPath:   "/media/series",
+		QualityProfileId: 1,
+	}
+
+	wanted, err := client.CreateSeries(&wantedShow)
+	if err != nil {
+		sentry.CaptureException(err)
+		log.Println(err)
+		return
+	}
+	fmt.Println(wanted)
 }
