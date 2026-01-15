@@ -3,6 +3,7 @@ package sonarr
 type SystemStatus struct {
 	AppName string `json:"appName"`
 	Version string `json:"version"`
+	OsName  string `json:"osName"`
 }
 
 type ApiInfo struct {
