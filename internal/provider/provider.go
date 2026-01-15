@@ -4,8 +4,10 @@ import (
 	"context"
 	"os"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/oleksii-kalinin/terraform-provider-sonarr/pkg/sonarr"
 )
@@ -19,22 +21,22 @@ type SonarrProviderModel struct {
 	ApiKey types.String `tfsdk:"api_key"`
 }
 
-func (sp *SonarrProvider) Metadata(ctx context.Context, req provider.MetadataRequest, res *provider.MetadataResponse) {
+func (sp *SonarrProvider) Metadata(_ context.Context, _ provider.MetadataRequest, res *provider.MetadataResponse) {
 	res.TypeName = "sonarr"
 	res.Version = sp.version
 }
 
-func (sp *SonarrProvider) Schema(ctx context.Context, req provider.SchemaRequest, res *provider.SchemaResponse) {
+func (sp *SonarrProvider) Schema(_ context.Context, _ provider.SchemaRequest, res *provider.SchemaResponse) {
 	res.Schema = schema.Schema{
 		Description: "Interact with Sonarr via Terraform",
 		Attributes: map[string]schema.Attribute{
 			"url": schema.StringAttribute{
-				Description: "URL of the Sonarr server",
-				Required:    true,
+				Description: "URL of the Sonarr server. Can also be set via SONARR_URL environment variable.",
+				Optional:    true,
 			},
 			"api_key": schema.StringAttribute{
-				Description: "API key for the sonarr instance",
-				Required:    true,
+				Description: "API key for the sonarr instance. Can also be set via SONARR_API_KEY environment variable.",
+				Optional:    true,
 			},
 		},
 	}
@@ -75,4 +77,12 @@ func (sp *SonarrProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	res.DataSourceData = client
 	res.ResourceData = client
+}
+
+func (sp *SonarrProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return []func() datasource.DataSource{}
+}
+
+func (sp *SonarrProvider) Resources(_ context.Context) []func() resource.Resource {
+	return []func() resource.Resource{}
 }
