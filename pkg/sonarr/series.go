@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func (c Client) GetSeries(id int32) (*Series, error) {
+func (c Client) GetSeries(id int) (*Series, error) {
 	series := Series{}
 
 	url := fmt.Sprintf("%s/api/v3/series/%d", c.BaseURL, id)
@@ -106,6 +106,12 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 	if err != nil {
 		return err
 	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
 
 	switch res.StatusCode {
 	case http.StatusOK:
