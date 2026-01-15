@@ -70,7 +70,7 @@ func (s *SystemStatusDataSource) Read(ctx context.Context, request datasource.Re
 
 	status, err := s.client.GetSystemStatus()
 	if err != nil {
-		response.Diagnostics.AddError("Client error", "Unable to communicate with Sonarr")
+		response.Diagnostics.AddError("Client error", fmt.Sprintf("Unable to communicate with Sonarr: %s", err.Error()))
 		return
 	}
 	data.OsName = types.StringValue(status.OsName)
