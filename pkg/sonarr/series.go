@@ -89,8 +89,11 @@ func (c Client) CreateSeries(show *Series) (*Series, error) {
 }
 
 func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
-	//url := fmt.Sprintf("%s/api/v3/series/%d?deleteFiles=%s", c.BaseURL, id, deleteFiles)
-	u, _ := url2.Parse(c.BaseURL)
+	u, err := url2.Parse(c.BaseURL)
+	if err != nil {
+		return err
+	}
+
 	u = u.JoinPath("api", "v3", "series", strconv.Itoa(id))
 
 	q := u.Query()
