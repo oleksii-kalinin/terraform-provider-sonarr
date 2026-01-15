@@ -21,6 +21,14 @@ type SonarrProviderModel struct {
 	ApiKey types.String `tfsdk:"api_key"`
 }
 
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &SonarrProvider{
+			version: version,
+		}
+	}
+}
+
 func (sp *SonarrProvider) Metadata(_ context.Context, _ provider.MetadataRequest, res *provider.MetadataResponse) {
 	res.TypeName = "sonarr"
 	res.Version = sp.version
