@@ -9,11 +9,11 @@ type ApiInfo struct {
 }
 
 type Series struct {
-	Id               int32  `json:"id"`
+	Id               int    `json:"id"`
 	Title            string `json:"title"`
 	RootFolderPath   string `json:"rootFolderPath"`
 	QualityProfileId int    `json:"qualityProfileId"`
 	Monitored        bool   `json:"monitored"`
 	SeasonFolder     bool   `json:"seasonFolder"`
-	TvdbID           int32  `json:"tvdbId"`
+	TvdbID           int    `json:"tvdbId"`
 }
