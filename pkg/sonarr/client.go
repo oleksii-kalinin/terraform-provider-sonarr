@@ -23,7 +23,7 @@ func NewClient(url, key string) *Client {
 	}
 }
 
-func (c Client) doRequest(r *http.Request) (*http.Response, error) {
+func (c *Client) doRequest(r *http.Request) (*http.Response, error) {
 	r.Header.Add("X-Api-Key", c.ApiKey)
 	r.Header.Add("Content-Type", "application/json")
 
