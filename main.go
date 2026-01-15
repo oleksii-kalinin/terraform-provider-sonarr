@@ -12,6 +12,11 @@ import (
 	"github.com/oleksii-kalinin/terraform-provider-sonarr/pkg/sonarr"
 )
 
+// main initializes environment and Sentry, validates required Sonarr environment variables,
+// and exercises the Sonarr client by fetching system status, retrieving a series (ID 78),
+// creating a series, waiting 10 seconds, and then deleting the created series.
+// Errors from Sonarr operations are reported to Sentry and logged; missing required
+// environment variables or a failed Sentry initialization cause the program to exit.
 func main() {
 	err := godotenv.Load()
 	if err != nil {
