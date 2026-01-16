@@ -10,7 +10,7 @@ type ApiInfo struct {
 }
 
 type Series struct {
-	Id               int         `json:"id"`
+	Id               int32       `json:"id"`
 	Title            string      `json:"title"`
 	RootFolderPath   string      `json:"rootFolderPath"`
 	QualityProfileId int32       `json:"qualityProfileId"`

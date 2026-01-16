@@ -1,6 +1,8 @@
 package sonarr
 
 import (
+	"io"
+	"log"
 	"net/http"
 	"time"
 )
@@ -32,4 +34,12 @@ func (c *Client) doRequest(r *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 	return res, err
+}
+
+// closeBody closes an io.ReadCloser and logs any error.
+// Use with defer: defer closeBody(resp.Body)
+func closeBody(body io.ReadCloser) {
+	if err := body.Close(); err != nil {
+		log.Print(err)
+	}
 }

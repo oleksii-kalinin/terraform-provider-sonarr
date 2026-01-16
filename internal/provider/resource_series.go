@@ -108,7 +108,7 @@ func (s *SeriesResource) Create(ctx context.Context, request resource.CreateRequ
 		return
 	}
 
-	plan.ID = types.StringValue(strconv.Itoa(seriesRes.Id))
+	plan.ID = types.StringValue(strconv.Itoa(int(seriesRes.Id)))
 
 	diags = response.State.Set(ctx, &plan)
 	if diags.HasError() {

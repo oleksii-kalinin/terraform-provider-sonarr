@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	url2 "net/url"
 	"strconv"
@@ -26,12 +25,7 @@ func (c *Client) GetAllSeries() ([]Series, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Print(err)
-		}
-	}(resp.Body)
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API error: status code %d", resp.StatusCode)
@@ -58,12 +52,7 @@ func (c *Client) GetSeries(id int) (*Series, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Print(err)
-		}
-	}(resp.Body)
+	defer closeBody(resp.Body)
 
 	switch resp.StatusCode {
 	case http.StatusNotFound:
@@ -101,12 +90,7 @@ func (c *Client) CreateSeries(show *Series) (*Series, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(res.Body)
+	defer closeBody(res.Body)
 
 	switch res.StatusCode {
 	case http.StatusCreated:
@@ -142,12 +126,7 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 	if err != nil {
 		return err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(res.Body)
+	defer closeBody(res.Body)
 
 	switch res.StatusCode {
 	case http.StatusNotFound:
@@ -185,12 +164,7 @@ func (c *Client) UpdateSeries(show *Series) (*Series, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(res.Body)
+	defer closeBody(res.Body)
 
 	switch res.StatusCode {
 	case http.StatusAccepted, http.StatusOK:
@@ -242,12 +216,7 @@ func (c *Client) LookupSeries(term string) ([]SeriesLookup, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Print(err)
-		}
-	}(resp.Body)
+	defer closeBody(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("API error: status code %d", resp.StatusCode)

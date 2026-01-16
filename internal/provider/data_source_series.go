@@ -111,7 +111,7 @@ func (s *SeriesDataSource) Read(ctx context.Context, request datasource.ReadRequ
 		return
 	}
 
-	data.ID = types.Int32Value(int32(found.Id))
+	data.ID = types.Int32Value(found.Id)
 	data.Title = types.StringValue(found.Title)
 	data.Path = types.StringValue(found.RootFolderPath)
 	data.QualityProfileId = types.Int32Value(found.QualityProfileId)
