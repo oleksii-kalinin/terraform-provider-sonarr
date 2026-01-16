@@ -11,6 +11,40 @@ import (
 	"strconv"
 )
 
+// GetAllSeries retrieves all series currently in the Sonarr library.
+// Returns a slice of Series or an error if the API call fails.
+func (c *Client) GetAllSeries() ([]Series, error) {
+	var series []Series
+
+	url := fmt.Sprintf("%s/api/v3/series", c.BaseURL)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status code %d", resp.StatusCode)
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&series)
+	if err != nil {
+		return nil, err
+	}
+	return series, nil
+}
+
 func (c *Client) GetSeries(id int) (*Series, error) {
 	series := Series{}
 
@@ -181,4 +215,48 @@ func (c *Client) UpdateSeries(show *Series) (*Series, error) {
 
 func (s Series) String() string {
 	return fmt.Sprint(s.Title)
+}
+
+// LookupSeries searches for series on TVDB via Sonarr's lookup endpoint.
+// The term parameter is the search query (e.g., series title).
+// Returns a slice of matching SeriesLookup results or an error if the API call fails.
+func (c *Client) LookupSeries(term string) ([]SeriesLookup, error) {
+	var results []SeriesLookup
+
+	u, err := url2.Parse(c.BaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	u = u.JoinPath("api", "v3", "series", "lookup")
+	q := u.Query()
+	q.Set("term", term)
+	u.RawQuery = q.Encode()
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("API error: status code %d", resp.StatusCode)
+	}
+
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(&results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
 }
