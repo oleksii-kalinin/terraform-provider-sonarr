@@ -12,6 +12,7 @@ type ApiInfo struct {
 type Series struct {
 	Id               int32       `json:"id"`
 	Title            string      `json:"title"`
+	Path             string      `json:"path"`
 	RootFolderPath   string      `json:"rootFolderPath"`
 	QualityProfileId int32       `json:"qualityProfileId"`
 	Monitored        bool        `json:"monitored"`

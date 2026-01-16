@@ -45,7 +45,7 @@ func (s *SeriesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest,
 			},
 			"path": schema.StringAttribute{
 				Computed:    true,
-				Description: "Root folder path of the series",
+				Description: "Full path to the series folder",
 			},
 			"quality_profile_id": schema.Int32Attribute{
 				Computed:    true,
@@ -113,7 +113,7 @@ func (s *SeriesDataSource) Read(ctx context.Context, request datasource.ReadRequ
 
 	data.ID = types.Int32Value(found.Id)
 	data.Title = types.StringValue(found.Title)
-	data.Path = types.StringValue(found.RootFolderPath)
+	data.Path = types.StringValue(found.Path)
 	data.QualityProfileId = types.Int32Value(found.QualityProfileId)
 	data.Monitored = types.BoolValue(found.Monitored)
 	data.SeasonFolder = types.BoolValue(found.SeasonFolder)
