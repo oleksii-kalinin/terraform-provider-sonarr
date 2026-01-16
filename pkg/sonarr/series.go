@@ -100,17 +100,10 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 	q.Set("deleteFiles", strconv.FormatBool(deleteFiles))
 	u.RawQuery = q.Encode()
 
-	// --- DEBUG PRINT ---
-	fmt.Printf("\n[DEBUG CLIENT] DELETE Request URL: %s\n", u.String())
-	// -------------------
-
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
 		return err
 	}
-	// --- DEBUG LOG ---
-	fmt.Printf("\n[DEBUG] Deleting Series. URL: %s\n", u.String())
-	// -----------------
 	res, err := c.doRequest(req)
 	if err != nil {
 		return err
@@ -121,13 +114,9 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 			log.Println(err)
 		}
 	}(res.Body)
-	// --- DEBUG PRINT ---
-	fmt.Printf("[DEBUG CLIENT] Response Status: %d %s\n", res.StatusCode, res.Status)
-	// -------------------
+
 	switch res.StatusCode {
 	case http.StatusNotFound:
-		// Series already deleted - this is OK
-		fmt.Printf("[DEBUG] Series %d not found (already deleted)\n", id)
 		return nil
 	case http.StatusNoContent: // 204 is common success for DELETE
 		return nil
@@ -141,6 +130,9 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 }
 
 func (c *Client) UpdateSeries(show *Series) (*Series, error) {
+	if show == nil {
+		return nil, fmt.Errorf("series can't be found: %v", show)
+	}
 	jsonBytes, err := json.Marshal(show)
 	if err != nil {
 		return nil, err
@@ -169,7 +161,13 @@ func (c *Client) UpdateSeries(show *Series) (*Series, error) {
 	switch res.StatusCode {
 	case http.StatusAccepted, http.StatusOK:
 		var resSeries Series
-		bodyBytes, _ := io.ReadAll(res.Body)
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		if len(bodyBytes) == 0 {
+			return show, nil
+		}
 		err = json.Unmarshal(bodyBytes, &resSeries)
 		if err != nil {
 			return nil, err
