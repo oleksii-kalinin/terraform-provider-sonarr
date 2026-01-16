@@ -94,5 +94,7 @@ func (sp *SonarrProvider) DataSources(_ context.Context) []func() datasource.Dat
 }
 
 func (sp *SonarrProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewSeriesResource,
+	}
 }

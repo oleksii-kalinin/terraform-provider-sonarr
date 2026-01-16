@@ -94,7 +94,7 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 		return err
 	}
 
-	u = u.JoinPath("api", "v3", "series", strconv.Itoa(id))
+	u = u.JoinPath("api", "v3", "series", strconv.Itoa(int(id)))
 
 	q := u.Query()
 	q.Set("deleteFiles", strconv.FormatBool(deleteFiles))
@@ -104,7 +104,6 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 	if err != nil {
 		return err
 	}
-
 	res, err := c.doRequest(req)
 	if err != nil {
 		return err
@@ -117,12 +116,66 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 	}(res.Body)
 
 	switch res.StatusCode {
-	case http.StatusOK:
-		return nil
 	case http.StatusNotFound:
 		return nil
+	case http.StatusNoContent: // 204 is common success for DELETE
+		return nil
+	case http.StatusOK: // 200 also OK
+		return nil
 	default:
-		return fmt.Errorf("API error: %d", res.StatusCode)
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("DELETE failed: %d %s - %s",
+			res.StatusCode, res.Status, string(body))
+	}
+}
+
+func (c *Client) UpdateSeries(show *Series) (*Series, error) {
+	if show == nil {
+		return nil, fmt.Errorf("series can't be found: %v", show)
+	}
+	jsonBytes, err := json.Marshal(show)
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/api/v3/series/%d", c.BaseURL, show.Id)
+
+	reqReader := bytes.NewBuffer(jsonBytes)
+
+	req, err := http.NewRequest("PUT", url, reqReader)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
+
+	switch res.StatusCode {
+	case http.StatusAccepted, http.StatusOK:
+		var resSeries Series
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		if len(bodyBytes) == 0 {
+			return show, nil
+		}
+		err = json.Unmarshal(bodyBytes, &resSeries)
+		if err != nil {
+			return nil, err
+		}
+		return &resSeries, nil
+	default:
+		bodyBytes, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("API Error: %d - %s", res.StatusCode, string(bodyBytes))
 	}
 }
 

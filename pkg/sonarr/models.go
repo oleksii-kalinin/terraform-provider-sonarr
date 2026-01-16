@@ -10,11 +10,16 @@ type ApiInfo struct {
 }
 
 type Series struct {
-	Id               int    `json:"id"`
-	Title            string `json:"title"`
-	RootFolderPath   string `json:"rootFolderPath"`
-	QualityProfileId int    `json:"qualityProfileId"`
-	Monitored        bool   `json:"monitored"`
-	SeasonFolder     bool   `json:"seasonFolder"`
-	TvdbID           int    `json:"tvdbId"`
+	Id               int         `json:"id"`
+	Title            string      `json:"title"`
+	RootFolderPath   string      `json:"rootFolderPath"`
+	QualityProfileId int32       `json:"qualityProfileId"`
+	Monitored        bool        `json:"monitored"`
+	SeasonFolder     bool        `json:"seasonFolder"`
+	TvdbID           int32       `json:"tvdbId"`
+	AddOptions       *AddOptions `json:"addOptions"`
+}
+
+type AddOptions struct {
+	Monitor string `json:"monitor"`
 }
