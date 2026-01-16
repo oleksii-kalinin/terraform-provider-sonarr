@@ -91,6 +91,11 @@ func (s *SeriesDataSource) Read(ctx context.Context, request datasource.ReadRequ
 		return
 	}
 
+	if s.client == nil {
+		response.Diagnostics.AddError("Provider not configured", "client is nil")
+		return
+	}
+
 	allSeries, err := s.client.GetAllSeries()
 	if err != nil {
 		response.Diagnostics.AddError("Client error", fmt.Sprintf("Unable to get series from Sonarr: %s", err.Error()))
