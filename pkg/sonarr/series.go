@@ -94,17 +94,23 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 		return err
 	}
 
-	u = u.JoinPath("api", "v3", "series", strconv.Itoa(id))
+	u = u.JoinPath("api", "v3", "series", strconv.Itoa(int(id)))
 
 	q := u.Query()
 	q.Set("deleteFiles", strconv.FormatBool(deleteFiles))
 	u.RawQuery = q.Encode()
 
+	// --- DEBUG PRINT ---
+	fmt.Printf("\n[DEBUG CLIENT] DELETE Request URL: %s\n", u.String())
+	// -------------------
+
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
 		return err
 	}
-
+	// --- DEBUG LOG ---
+	fmt.Printf("\n[DEBUG] Deleting Series. URL: %s\n", u.String())
+	// -----------------
 	res, err := c.doRequest(req)
 	if err != nil {
 		return err
@@ -115,14 +121,63 @@ func (c *Client) DeleteSeries(id int, deleteFiles bool) error {
 			log.Println(err)
 		}
 	}(res.Body)
-
+	// --- DEBUG PRINT ---
+	fmt.Printf("[DEBUG CLIENT] Response Status: %d %s\n", res.StatusCode, res.Status)
+	// -------------------
 	switch res.StatusCode {
-	case http.StatusOK:
-		return nil
 	case http.StatusNotFound:
+		// Series already deleted - this is OK
+		fmt.Printf("[DEBUG] Series %d not found (already deleted)\n", id)
+		return nil
+	case http.StatusNoContent: // 204 is common success for DELETE
+		return nil
+	case http.StatusOK: // 200 also OK
 		return nil
 	default:
-		return fmt.Errorf("API error: %d", res.StatusCode)
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("DELETE failed: %d %s - %s",
+			res.StatusCode, res.Status, string(body))
+	}
+}
+
+func (c *Client) UpdateSeries(show *Series) (*Series, error) {
+	jsonBytes, err := json.Marshal(show)
+	if err != nil {
+		return nil, err
+	}
+
+	url := fmt.Sprintf("%s/api/v3/series/%d", c.BaseURL, show.Id)
+
+	reqReader := bytes.NewBuffer(jsonBytes)
+
+	req, err := http.NewRequest("PUT", url, reqReader)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.doRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}(res.Body)
+
+	switch res.StatusCode {
+	case http.StatusAccepted, http.StatusOK:
+		var resSeries Series
+		bodyBytes, _ := io.ReadAll(res.Body)
+		err = json.Unmarshal(bodyBytes, &resSeries)
+		if err != nil {
+			return nil, err
+		}
+		return &resSeries, nil
+	default:
+		bodyBytes, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("API Error: %d - %s", res.StatusCode, string(bodyBytes))
 	}
 }
 
