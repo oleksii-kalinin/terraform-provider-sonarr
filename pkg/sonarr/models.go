@@ -10,8 +10,9 @@ type ApiInfo struct {
 }
 
 type Series struct {
-	Id               int         `json:"id"`
+	Id               int32       `json:"id"`
 	Title            string      `json:"title"`
+	Path             string      `json:"path"`
 	RootFolderPath   string      `json:"rootFolderPath"`
 	QualityProfileId int32       `json:"qualityProfileId"`
 	Monitored        bool        `json:"monitored"`
@@ -22,4 +23,18 @@ type Series struct {
 
 type AddOptions struct {
 	Monitor string `json:"monitor"`
+}
+
+// SeriesLookup represents a series returned from Sonarr's TVDB lookup endpoint.
+type SeriesLookup struct {
+	Title      string `json:"title"`
+	SortTitle  string `json:"sortTitle"`
+	Status     string `json:"status"`
+	Overview   string `json:"overview"`
+	Network    string `json:"network"`
+	Year       int32  `json:"year"`
+	TvdbId     int32  `json:"tvdbId"`
+	ImdbId     string `json:"imdbId"`
+	Runtime    int32  `json:"runtime"`
+	SeasonCount int32 `json:"seasonCount"`
 }
