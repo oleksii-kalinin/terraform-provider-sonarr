@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -31,6 +32,11 @@ type SeriesResourceModel struct {
 
 type AddOptionsModel struct {
 	Monitor types.String `tfsdk:"monitor"`
+}
+
+// normalizePath removes trailing slashes from paths to match Sonarr API behavior
+func normalizePath(path string) string {
+	return strings.TrimSuffix(path, "/")
 }
 
 func (s *SeriesResource) Metadata(_ context.Context, request resource.MetadataRequest, response *resource.MetadataResponse) {
@@ -109,6 +115,10 @@ func (s *SeriesResource) Create(ctx context.Context, request resource.CreateRequ
 	}
 
 	plan.ID = types.StringValue(strconv.Itoa(int(seriesRes.Id)))
+	plan.Title = types.StringValue(seriesRes.Title)
+	plan.Path = types.StringValue(normalizePath(seriesRes.RootFolderPath))
+	plan.Monitored = types.BoolValue(seriesRes.Monitored)
+	plan.QualityProfileId = types.Int32Value(seriesRes.QualityProfileId)
 
 	diags = response.State.Set(ctx, &plan)
 	if diags.HasError() {
@@ -149,7 +159,7 @@ func (s *SeriesResource) Read(ctx context.Context, request resource.ReadRequest,
 
 	state.TvdbId = types.Int32Value(seriesReq.TvdbID)
 	state.Title = types.StringValue(seriesReq.Title)
-	state.Path = types.StringValue(seriesReq.RootFolderPath)
+	state.Path = types.StringValue(normalizePath(seriesReq.RootFolderPath))
 	state.Monitored = types.BoolValue(seriesReq.Monitored)
 	state.QualityProfileId = types.Int32Value(seriesReq.QualityProfileId)
 
@@ -189,13 +199,17 @@ func (s *SeriesResource) Update(ctx context.Context, request resource.UpdateRequ
 	currentSeries.QualityProfileId = plan.QualityProfileId.ValueInt32()
 	currentSeries.TvdbID = plan.TvdbId.ValueInt32()
 
-	_, err = s.client.UpdateSeries(currentSeries)
+	updatedSeries, err := s.client.UpdateSeries(currentSeries)
 	if err != nil {
 		response.Diagnostics.AddError("Error updating series", err.Error())
 		return
 	}
 
 	plan.ID = state.ID
+	plan.Path = types.StringValue(normalizePath(updatedSeries.RootFolderPath))
+	plan.Title = types.StringValue(updatedSeries.Title)
+	plan.Monitored = types.BoolValue(updatedSeries.Monitored)
+	plan.QualityProfileId = types.Int32Value(updatedSeries.QualityProfileId)
 	response.State.Set(ctx, &plan)
 }
 
