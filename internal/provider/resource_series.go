@@ -207,6 +207,9 @@ func (s *SeriesResource) Update(ctx context.Context, request resource.UpdateRequ
 
 	plan.ID = state.ID
 	plan.Path = types.StringValue(normalizePath(updatedSeries.RootFolderPath))
+	plan.Title = types.StringValue(updatedSeries.Title)
+	plan.Monitored = types.BoolValue(updatedSeries.Monitored)
+	plan.QualityProfileId = types.Int32Value(updatedSeries.QualityProfileId)
 	response.State.Set(ctx, &plan)
 }
 
