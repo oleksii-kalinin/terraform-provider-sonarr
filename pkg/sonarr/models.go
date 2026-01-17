@@ -27,14 +27,14 @@ type AddOptions struct {
 
 // SeriesLookup represents a series returned from Sonarr's TVDB lookup endpoint.
 type SeriesLookup struct {
-	Title      string `json:"title"`
-	SortTitle  string `json:"sortTitle"`
-	Status     string `json:"status"`
-	Overview   string `json:"overview"`
-	Network    string `json:"network"`
-	Year       int32  `json:"year"`
-	TvdbId     int32  `json:"tvdbId"`
-	ImdbId     string `json:"imdbId"`
-	Runtime    int32  `json:"runtime"`
-	SeasonCount int32 `json:"seasonCount"`
+	Title       string `json:"title"`
+	SortTitle   string `json:"sortTitle"`
+	Status      string `json:"status"`
+	Overview    string `json:"overview"`
+	Network     string `json:"network"`
+	Year        int32  `json:"year"`
+	TvdbId      int32  `json:"tvdbId"`
+	ImdbId      string `json:"imdbId"`
+	Runtime     int32  `json:"runtime"`
+	SeasonCount int32  `json:"seasonCount"`
 }
